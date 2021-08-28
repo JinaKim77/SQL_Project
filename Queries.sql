@@ -78,25 +78,24 @@ ORDER BY 1,2
 # Write a query that returns the store ID for the store, the year and month and the number of rental orders each store has fulfilled for that month.
 # Your table should include a column for each of the following: year, month, store ID and count of rental orders fulfilled during that month.
 
+# The count of rental orders is sorted in descending order.
+
 WITH dsf AS(
   SELECT r.rental_date rentaldate,
          date_part('year', r.rental_date) AS Rental_year,
          date_part('month', r.rental_date) AS Rental_month,
          s.store_id AS Store_ID
-  FROM rental r
-  JOIN payment pa
-  ON pa.rental_id = r.rental_id
-  JOIN staff s
-  ON s.staff_id =  pa.staff_id
-  JOIN store st
-  ON st.store_id=s.store_id
+  FROM store s
+  JOIN staff st
+  ON st.store_id = s.store_id
+  JOIN rental r
+  ON r.staff_id = st.staff_id
 )
 SELECT Rental_month,
        Rental_year,
        Store_ID,
-       COUNT(*) AS Count_rentals
+       COUNT(rentaldate) AS Count_rentals
 FROM dsf
-WHERE Rental_month in (7,8)
 GROUP BY 1,2,3
 ORDER  BY 4 DESC;
 
@@ -155,9 +154,9 @@ top_10_monthly AS(
   SELECT *
   FROM
   (SELECT top.full_name AS fullname,
-       date_trunc('month', p.payment_date) AS pay_mon,
-	   COUNT(*) AS pay_countpermon,
-	   SUM(p.amount) as payment_amount
+          date_trunc('month', p.payment_date) AS pay_mon,
+	      COUNT(*) AS pay_countpermon,
+	      SUM(p.amount) as payment_amount
   FROM customer c
   JOIN payment p
   ON c.customer_id=p.customer_id
@@ -166,15 +165,20 @@ top_10_monthly AS(
   GROUP BY 1,2)t1
   ORDER BY 1
 )
-SELECT fullname,pay_mon,pay_countpermon,payment_amount,lag AS amount_before,lead AS present, difference
+SELECT fullname,
+       pay_mon,
+       pay_countpermon,
+	   lag AS amount_before,
+       payment_amount amount_present,
+       difference
 FROM
 (SELECT fullname,
-	   date_part('month',pay_mon) as pay_mon,
-	   pay_countpermon,
-	   payment_amount,
-	   LAG(payment_amount) OVER (PARTITION BY fullname) AS lag,
-	   LEAD(payment_amount) OVER (PARTITION BY fullname) AS lead,
-	   (LEAD(payment_amount) OVER (PARTITION BY fullname))-(LAG(payment_amount) OVER (PARTITION BY fullname)) AS difference
+	    date_part('month',pay_mon) as pay_mon,
+	    pay_countpermon,
+	    payment_amount,
+	    LAG(payment_amount) OVER (PARTITION BY fullname) AS lag,
+	    LEAD(payment_amount) OVER (PARTITION BY fullname) AS lead,
+	    payment_amount-(LAG(payment_amount) OVER (PARTITION BY fullname)) AS difference
 FROM top_10_monthly)t1
 WHERE difference IS NOT NULL
 ORDER BY difference DESC

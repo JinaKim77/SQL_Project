@@ -12,6 +12,8 @@
    - Answer to the question, based on the data and visualization, on each slide
    
 * Text File with SQL queries
+   - This file includes each of the queries I used to create visualizations.
+ 
 
 <br>
 
