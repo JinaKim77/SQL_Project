@@ -50,7 +50,7 @@ FROM
    ON c.category_id=fc.category_id
    WHERE c.name in ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music'))t1
 GROUP BY 1,2
-ORDER BY 1,2
+ORDER BY 1,2;
 
 
 
@@ -104,8 +104,7 @@ ON c.customer_id=p.customer_id
 JOIN top_10 top
 ON c.first_name || ' ' || c.last_name=top.full_name
 GROUP BY 1
-ORDER BY 1
-
+ORDER BY 1;
 
 
 
@@ -135,9 +134,6 @@ ORDER BY 2,1;
 
 
 
-
-
-
 # Now we need to know how the length of rental duration of these family-friendly movies compares to the duration that all movies are rented for.
 # Can you provide a table with the movie titles and divide them into 4 levels (first_quarter, second_quarter, third_quarter, and final_quarter)
 # based on the quartiles (25%, 50%, 75%) of the rental duration for movies across all categories?
@@ -154,7 +150,8 @@ JOIN film_category fc
 ON fc.film_id = f.film_id
 JOIN category c
 ON c.category_id=fc.category_id
-WHERE c.name in ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music')
+WHERE c.name in ('Animation', 'Children', 'Classics', 'Comedy', 'Family', 'Music');
+
 
 
 # We would like to know who were our top 10 paying customers,
@@ -184,7 +181,7 @@ ON c.customer_id=p.customer_id
 JOIN top_10 top
 ON c.first_name || ' ' || c.last_name=top.full_name
 GROUP BY 1,2
-ORDER BY 1
+ORDER BY 1;
 
 
 
@@ -235,4 +232,4 @@ FROM
 	    payment_amount-(LAG(payment_amount) OVER (PARTITION BY fullname)) AS difference
 FROM top_10_monthly)t1
 WHERE difference IS NOT NULL
-ORDER BY difference DESC
+ORDER BY difference DESC;
